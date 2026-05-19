@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>emoplant forum</title>
+<style>
+body{font-family:Arial;background:#121212;color:#fff;max-width:900px;margin:auto}
+h1{text-align:center}
+input,textarea,button{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
+button{background:#2e8b57;color:white;font-weight:bold;cursor:pointer}
+.topic{border:1px solid #333;padding:10px;margin:8px 0;border-radius:8px;cursor:pointer}
+.message{border-top:1px solid #333;margin-top:10px;padding-top:10px}
+.back{background:#444}
+</style>
+</head>
+<body>
+
+<h1>🌱 emoplant forum</h1>
+
+<div id="home">
+  <h3>Создать тему</h3>
+  <input id="topicTitle" placeholder="Название темы">
+  <button onclick="createTopic()">Создать тему</button>
+  <h3>Темы</h3>
+  <div id="topics"></div>
+</div>
+
+<div id="topicPage" style="display:none">
+  <button class="back" onclick="goHome()">← Назад</button>
+  <h2 id="title"></h2>
+
+  <div id="messages"></div>
+
+  <textarea id="msgInput" placeholder="Написать сообщение"></textarea>
+  <button onclick="sendMessage()">Отправить</button>
+</div>
+
+<script>
+let topics = JSON.parse(localStorage.getItem('emoplant_topics')||'[]');
+let current = null;
+
+function save(){localStorage.setItem('emoplant_topics',JSON.stringify(topics));}
+
+function renderTopics(){
+  let el=document.getElementById('topics');
+  el.innerHTML='';
+  topics.forEach((t,i)=>{
+    el.innerHTML+=`<div class="topic" onclick="openTopic(${i})">${t.title}</div>`;
+  });
+}
+
+function createTopic(){
+  let title=document.getElementById('topicTitle').value;
+  if(!title) return;
+  topics.push({title:title,messages:[]});
+  save();
+  renderTopics();
+  document.getElementById('topicTitle').value='';
+}
+
+function openTopic(i){
+  current=i;
+  document.getElementById('home').style.display='none';
+  document.getElementById('topicPage').style.display='block';
+  document.getElementById('title').innerText=topics[i].title;
+  renderMessages();
+}
+
+function goHome(){
+  document.getElementById('home').style.display='block';
+  document.getElementById('topicPage').style.display='none';
+}
+
+function renderMessages(){
+  let el=document.getElementById('messages');
+  el.innerHTML='';
+  topics[current].messages.forEach(m=>{
+    el.innerHTML+=`<div class="message">${m}</div>`;
+  });
+}
+
+function sendMessage(){
+  let msg=document.getElementById('msgInput').value;
+  if(!msg) return;
+  topics[current].messages.push(msg);
+  save();
+  renderMessages();
+  document.getElementById('msgInput').value='';
+}
+
+renderTopics();
+</script>
+
+</body>
+</html>
