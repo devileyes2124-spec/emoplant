@@ -4,66 +4,106 @@
 <meta charset="UTF-8">
 <title>emoplant forum</title>
 <style>
-body{font-family:Arial;background:#121212;color:#fff;max-width:900px;margin:auto}
-h1{text-align:center}
-input,textarea,button{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
-button{background:#2e8b57;color:white;font-weight:bold;cursor:pointer}
-.topic{border:1px solid #333;padding:10px;margin:8px 0;border-radius:8px;cursor:pointer}
-.message{border-top:1px solid #333;margin-top:10px;padding-top:10px}
-.back{background:#444}
+body{margin:0;font-family:Arial;background:#0b0b0b;color:#ddd}
+header{
+  background:linear-gradient(90deg,#8b0000,#ff0000);
+  padding:30px;
+  text-align:center;
+  font-size:40px;
+  font-weight:bold;
+  color:white;
+}
+nav{
+  background:#1a1a1a;
+  padding:10px;
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  border-bottom:2px solid #ff0040;
+}
+nav div{cursor:pointer}
+.container{max-width:1000px;margin:20px auto;padding:10px}
+.category{
+  border:1px solid #333;
+  margin:15px 0;
+  border-radius:8px;
+}
+.category h2{
+  margin:0;
+  padding:10px;
+  background:#111;
+  border-bottom:1px solid #333;
+  color:#ff3366;
+}
+.topic{
+  padding:10px;
+  border-top:1px solid #222;
+  cursor:pointer;
+}
+.topic:hover{background:#1c1c1c}
+button,input,textarea{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:6px;
+  border:none;
+}
+button{background:#ff0040;color:white;font-weight:bold;cursor:pointer}
+#topicPage{display:none}
+.message{
+  border-top:1px solid #333;
+  padding:10px 0;
+}
+.back{background:#333}
 </style>
 </head>
 <body>
 
-<h1>🌱 emoplant forum</h1>
+<header>🌱 EMOPLANT FORUM</header>
 
-<div id="home">
-  <h3>Создать тему</h3>
-  <input id="topicTitle" placeholder="Название темы">
-  <button onclick="createTopic()">Создать тему</button>
-  <h3>Темы</h3>
-  <div id="topics"></div>
+<nav>
+  <div>Форумы</div>
+  <div>Правила</div>
+  <div>Поддержка</div>
+</nav>
+
+<div class="container" id="home">
+
+  <div class="category">
+    <h2>📢 Информация</h2>
+    <div class="topic" onclick="openTopic('info')">Объявления проекта</div>
+  </div>
+
+  <div class="category">
+    <h2>💬 Общение</h2>
+    <div class="topic" onclick="openTopic('chat')">Флудилка</div>
+  </div>
+
 </div>
 
-<div id="topicPage" style="display:none">
+<div class="container" id="topicPage">
   <button class="back" onclick="goHome()">← Назад</button>
-  <h2 id="title"></h2>
+  <h2 id="topicTitle"></h2>
 
   <div id="messages"></div>
 
-  <textarea id="msgInput" placeholder="Написать сообщение"></textarea>
+  <textarea id="msgInput" placeholder="Сообщение"></textarea>
   <button onclick="sendMessage()">Отправить</button>
 </div>
 
 <script>
-let topics = JSON.parse(localStorage.getItem('emoplant_topics')||'[]');
-let current = null;
+let data = JSON.parse(localStorage.getItem('emoplant_data')||'{}');
+let current='';
 
-function save(){localStorage.setItem('emoplant_topics',JSON.stringify(topics));}
+function save(){localStorage.setItem('emoplant_data',JSON.stringify(data));}
 
-function renderTopics(){
-  let el=document.getElementById('topics');
-  el.innerHTML='';
-  topics.forEach((t,i)=>{
-    el.innerHTML+=`<div class="topic" onclick="openTopic(${i})">${t.title}</div>`;
-  });
-}
-
-function createTopic(){
-  let title=document.getElementById('topicTitle').value;
-  if(!title) return;
-  topics.push({title:title,messages:[]});
-  save();
-  renderTopics();
-  document.getElementById('topicTitle').value='';
-}
-
-function openTopic(i){
-  current=i;
+function openTopic(name){
+  current=name;
+  if(!data[name]) data[name]=[];
   document.getElementById('home').style.display='none';
   document.getElementById('topicPage').style.display='block';
-  document.getElementById('title').innerText=topics[i].title;
-  renderMessages();
+  document.getElementById('topicTitle').innerText=name;
+  render();
 }
 
 function goHome(){
@@ -71,10 +111,10 @@ function goHome(){
   document.getElementById('topicPage').style.display='none';
 }
 
-function renderMessages(){
+function render(){
   let el=document.getElementById('messages');
   el.innerHTML='';
-  topics[current].messages.forEach(m=>{
+  data[current].forEach(m=>{
     el.innerHTML+=`<div class="message">${m}</div>`;
   });
 }
@@ -82,13 +122,11 @@ function renderMessages(){
 function sendMessage(){
   let msg=document.getElementById('msgInput').value;
   if(!msg) return;
-  topics[current].messages.push(msg);
+  data[current].push(msg);
   save();
-  renderMessages();
+  render();
   document.getElementById('msgInput').value='';
 }
-
-renderTopics();
 </script>
 
 </body>
